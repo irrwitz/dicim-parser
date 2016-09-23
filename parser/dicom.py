@@ -1,42 +1,57 @@
 import re
 
-START_HEADER = 'W: # Dicom-Data-Set'
-END_HEADER = 'W:'
-SPECIFIC_CHAR_SET = '(0008,0005)'
-STUDY_DATE = '(0008,0020)'
-ACCESSION_NUMBER = '(0008,0050)'
-MODALITY = '(0008,0060)'
-INSTITUTION_NAME = '(0008,0080)'
-REFERRING_PHYSICIAN_NAME = '(0008,0090)'
-STUDY_DESCRIPTION = '(0008,1030)'
-SERIES_DESCRIPTION = '(0008,103e)'
-PATIENT_BIRTH_DATE = '(0010,0030)'
-PATIENT_SEX = '(0010,0040)'
-BODY_PART_EXAMINED = '(0018,0015)'
-STUDY_INSTANCE_UID = '(0020,000d)'
-SERIES_INSTANCE_UID = '(0020,000e)'
-STUDY_ID = '(0020,0010)'
-SERIES_NUMBER = '(0020,0011)'
+PatientName = '(0010,0010)'
+PatientBirthDate = '(0010,0030)'
+PatientID = '(0010,0020)'
+PatientSex = '(0010,0040)'
+StudyDate = '(0008,0020)'
+Modality = '(0008,0060)'
+BodyPartExamined = '(0018,0015)'
+StudyDescription = '(0008,1030)'
+SeriesDescription = '(0008,103e)'
+AccessionNumber = '(0008,0050)'
+StudyID = '(0020,0010)'
+SeriesNumber = '(0020,0011)'
+InstanceNumber = '(0020,0013)'
+ReferringPhysicianName = '(0008,0090)'
+InstanceAvailability = '(0008,0056)'
+InstitutionName = '(0008,0080)'
+StudyInstanceUID = '(0020,000d)'
+SeriesInstanceUID = '(0020,000e)'
+SpecificCharacterSet = '(0008,0005)'
+QueryRetrieveLevel = '(0008,0052)'
+RetrieveAETitle = '(0008,0054)'
 
 
-def is_start(line):
-    """returns True if it is the start of a DICOM header"""
-    return line.startswith(START_HEADER)
+def get_headers(fileobject):
+    result = []
+    single_header = {}
+    for line in fileobject:
+        if is_valid(line):
+            single_header[get_tag(line)[2]] = get_value(line)
+        if is_start_or_end(line) and single_header:
+            result.append(single_header.copy())
+            single_header.clear()
+    return result
 
 
-def is_end(line):
-    """Returns True if it is the end of a DICOM header"""
-    return line.endwith(END_HEADER)
+def is_start_or_end(line):
+    """ Returns True if it is the end of a DICOM header """
+    return re.match('^W:\s*$', line)
 
 
 def is_valid(line):
     return '(' in line and ')' in line and '[' in line and ']' in line
 
 
+def get_tag_value(line):
+    return get_tag(line), get_tag_value(line)
+
+
 def get_tag(line):
     """
     Returns the tag value of the line, which is everything between
-    the first brackets.
+    the first square brackets.
     For example on this line
         W: (0010,0040) CS [F ]
     tag value would be (0010,0040)
