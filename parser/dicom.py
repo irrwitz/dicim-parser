@@ -1,26 +1,50 @@
 import re
 
-PatientName = '(0010,0010)'
-PatientBirthDate = '(0010,0030)'
-PatientID = '(0010,0020)'
-PatientSex = '(0010,0040)'
-StudyDate = '(0008,0020)'
-Modality = '(0008,0060)'
-BodyPartExamined = '(0018,0015)'
-StudyDescription = '(0008,1030)'
-SeriesDescription = '(0008,103e)'
-AccessionNumber = '(0008,0050)'
-StudyID = '(0020,0010)'
-SeriesNumber = '(0020,0011)'
-InstanceNumber = '(0020,0013)'
-ReferringPhysicianName = '(0008,0090)'
-InstanceAvailability = '(0008,0056)'
-InstitutionName = '(0008,0080)'
-StudyInstanceUID = '(0020,000d)'
-SeriesInstanceUID = '(0020,000e)'
-SpecificCharacterSet = '(0008,0005)'
-QueryRetrieveLevel = '(0008,0052)'
-RetrieveAETitle = '(0008,0054)'
+PATIENT_NAME = 'PatientName'
+PATIENT_BIRTHDATE = 'PatientBirthDate'
+PATIENT_ID = 'PatientID'
+PATIENT_SEX = 'PatientSex'
+STUDY_DATE = 'StudyDate'
+MODALITY = 'Modality'
+BODY_PART_EXAMINED = 'BodyPartExamined'
+STUDY_DESCRIPTION = 'StudyDescription'
+SERIES_DESCRIPTION = 'SeriesDescription'
+ACCESSION_NUMBER = 'AccessionNumber'
+STUDY_ID = 'StudyID'
+SERIES_NUMBER = 'SeriesNumber'
+INSTANCE_NUMBER = 'InstanceNumber'
+REFERRING_PHYSICIAN_NAME = 'ReferringPhysicianName'
+INSTANCE_AVAILABILITY = 'InstanceAvailability'
+INSTITUTION_NAME = 'InstitutionName'
+STUDY_INSTANCE_UID = 'StudyInstanceUID'
+SERIES_INSTANCE_UID = 'SeriesInstanceUID'
+SPECIFIC_CHARACTER_SET = 'SpecificCharacterSet'
+QUERY_RETRIEVE_LEVEL = 'QueryRetrieveLevel'
+RETRIEVE_AE_TITLE = 'RetrieveAETitle'
+
+TAGS = {
+    '(0010,0010)': PATIENT_NAME,
+    '(0010,0030)': PATIENT_BIRTHDATE,
+    '(0010,0020)': PATIENT_ID,
+    '(0010,0040)': PATIENT_SEX,
+    '(0008,0020)': STUDY_DATE,
+    '(0008,0060)': MODALITY,
+    '(0018,0015)': BODY_PART_EXAMINED,
+    '(0008,1030)': STUDY_DESCRIPTION,
+    '(0008,103e)': SERIES_DESCRIPTION,
+    '(0008,0050)': ACCESSION_NUMBER,
+    '(0020,0010)': STUDY_ID,
+    '(0020,0011)': SERIES_NUMBER,
+    '(0020,0013)': INSTANCE_NUMBER,
+    '(0008,0090)': REFERRING_PHYSICIAN_NAME,
+    '(0008,0056)': INSTANCE_AVAILABILITY,
+    '(0008,0080)': INSTITUTION_NAME,
+    '(0020,000d)': STUDY_INSTANCE_UID,
+    '(0020,000e)': SERIES_INSTANCE_UID,
+    '(0008,0005)': SPECIFIC_CHARACTER_SET,
+    '(0008,0052)': QUERY_RETRIEVE_LEVEL,
+    '(0008,0054)': RETRIEVE_AE_TITLE
+}
 
 
 def get_headers(fileobject):
@@ -28,7 +52,7 @@ def get_headers(fileobject):
     single_header = {}
     for line in fileobject:
         if is_valid(line):
-            single_header[get_tag(line)[2]] = get_value(line)
+            single_header[get_tag(line)] = get_value(line)
         if is_start_or_end(line) and single_header:
             result.append(single_header.copy())
             single_header.clear()
@@ -57,7 +81,7 @@ def get_tag(line):
     tag value would be (0010,0040)
     """
     result = re.search('(\(.*\))', line)
-    return result.group(0) if result else ''
+    return TAGS[result.group(0)] if result else ''
 
 
 def get_value(line):
@@ -68,4 +92,4 @@ def get_value(line):
     :return: value
     """
     result = re.search('\[(.*)\]', line)
-    return result.group(1) if result else ''
+    return result.group(1).strip() if result else ''
