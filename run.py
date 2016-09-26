@@ -10,7 +10,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 
-with open(sys.argv[1], 'r') as fileobject:
+with open(sys.argv[1], mode='r', encoding='latin_1') as fileobject:
     headers = parser.dicom.get_headers(fileobject)
     print(len(headers))
     fieldnames = [parser.dicom.ACCESSION_NUMBER,

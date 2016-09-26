@@ -60,7 +60,9 @@ def get_headers(fileobject):
 
 
 def is_start_or_end(line):
-    """ Returns True if it is the end of a DICOM header """
+    """ Returns True if it is the start or end of a DICOM header.
+        Checks for an Line 'W:<empty space>'
+     """
     return re.match('^W:\s*$', line)
 
 
@@ -69,7 +71,7 @@ def is_valid(line):
 
 
 def get_tag_value(line):
-    return get_tag(line), get_tag_value(line)
+    return get_tag(line), get_value(line)
 
 
 def get_tag(line):
@@ -80,8 +82,7 @@ def get_tag(line):
         W: (0010,0040) CS [F ]
     tag value would be (0010,0040)
     """
-    result = re.search('(\(.*\))', line)
-    return TAGS[result.group(0)] if result else ''
+    return TAGS[line[3:14]]
 
 
 def get_value(line):
@@ -91,5 +92,6 @@ def get_value(line):
     :param line: a line of the dicom file
     :return: value
     """
-    result = re.search('\[(.*)\]', line)
-    return result.group(1).strip() if result else ''
+    x = line.find('[') + 1
+    y = line.rfind(']')
+    return line[x:y].strip()
