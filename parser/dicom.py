@@ -67,7 +67,8 @@ def is_start_or_end(line):
 
 
 def is_valid(line):
-    return '(' in line and ')' in line and '[' in line and ']' in line
+    return line.startswith('W:') \
+           and '(' in line and ')' in line and '[' in line and ']' in line
 
 
 def get_tag_value(line):
